@@ -1,4 +1,6 @@
 ﻿using Domain.Entities;
+using Repository.Repositories.Implimentations;
+using Repository.Repositories.Interfaces;
 using Service.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -8,16 +10,30 @@ using System.Threading.Tasks;
 
 namespace Service.Services.Implementations
 {
-    internal class UserGroupService : IUserGroupService
+    public class UserGroupService : IUserGroupService
     {
+        private UserGroupRepository _userGroupRepository;
+        private int _count = 1;
+        public UserGroupService()
+        {
+            _userGroupRepository= new UserGroupRepository();
+        }
         public UserGroup Create(UserGroup userGroup)
         {
-            throw new NotImplementedException();
+            userGroup.Id=_count;
+
+            _userGroupRepository.Create(userGroup);
+
+            _count++;
+
+            return userGroup;
         }
 
         public void Delete(int id)
         {
-            throw new NotImplementedException();
+            UserGroup userGroup = GetById(id);
+
+            _userGroupRepository.Delete(userGroup);
         }
 
         public List<UserGroup> GetAll()
@@ -27,7 +43,16 @@ namespace Service.Services.Implementations
 
         public UserGroup GetById(int id)
         {
-            throw new NotImplementedException();
+                if (id <= 0)
+                {
+                    throw new ArgumentException("Id sifirdan boyuk olmalidir");
+                }
+                UserGroup userGroup = _userGroupRepository.Get(g => g.Id == id);
+                if (userGroup == null)
+                {
+                    throw new NullReferenceException($"ID-si {id} olan UserGroup tapılmadı.");
+                }
+                return userGroup;
         }
 
         public List<UserGroup> Search(string name)
