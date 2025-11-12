@@ -2,7 +2,7 @@
 using Repository.Data;
 using Repository.Exceptions;
 using Repository.Repositories.Interfaces;
-using System.Xml.Linq;
+
 
 namespace Repository.Repositories.Implimentations
 {
@@ -29,7 +29,7 @@ namespace Repository.Repositories.Implimentations
             {
                 if (data == null) throw new NotFoundException("Usergroup cant be null");
 
-                
+
                 if (AppDbContext<UserGroup>.datas.Count!=0)
                 {
                     bool isDeleted = AppDbContext<UserGroup>.datas.Remove(data);
@@ -61,87 +61,77 @@ namespace Repository.Repositories.Implimentations
             {
                 if (predicate == null) throw new NullPredicateException("Predicate cannot be null");
 
-
-                for (int i = 0; i < AppDbContext<UserGroup>.datas.Count; i++)
+                if (AppDbContext<UserGroup>.datas.Count!=0)
                 {
-                    var item = AppDbContext<UserGroup>.datas[i];
-                    if (predicate(item))
-                    {
-                        return item;
-                    }
-                }
 
-                throw new Exception("Group not found.");
-            }
-            catch (Exception ex)
-            {
-              
-                return null;
-            }
-        }
-
-        public List<UserGroup> GetAll(Predicate<UserGroup> predicate)
-        {
-            try
-            {
-                List<UserGroup> userGroups = new();
-
-                if (predicate == null)
-                {
-                    for (int i = 0; i < AppDbContext<UserGroup>.datas.Count; i++)
-                    {
-                        userGroups.Add(AppDbContext<UserGroup>.datas[i]);
-                    }
-                }
-                else
-                {
                     for (int i = 0; i < AppDbContext<UserGroup>.datas.Count; i++)
                     {
                         var item = AppDbContext<UserGroup>.datas[i];
                         if (predicate(item))
                         {
-                            userGroups.Add(item);
+                            return item;
                         }
                     }
+
+                }
+                else
+                {
+                    throw new NullReferenceException("group icinde her hansi bir element yoxdur");
                 }
 
-                if (userGroups.Count == 0)
-                    Console.WriteLine(" UserGroups cant found.");
-
-                return userGroups;
+                    return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error :{ex.Message}");
-                return new List<UserGroup>();
+                return null;
             }
+        }
+
+        public List<UserGroup> GetAll(Predicate<UserGroup> predicate=null)
+        {
+            return predicate != null ? AppDbContext<UserGroup>.datas.FindAll(predicate) : AppDbContext<UserGroup>.datas;
         }
 
         public void Update(UserGroup data)
         {
-            try
+            UserGroup dbGroup = Get(l => l.Id == data.Id);
+
+            if (dbGroup == null) return;
+
+            if (!string.IsNullOrEmpty(data.Name))
             {
-                if (data == null) throw new NullPredicateException("UserGroup cannot be null.");
-
-                bool found = false;
-
-                for (int i = 0; i < AppDbContext<UserGroup>.datas.Count; i++)
-                {
-                    if (AppDbContext<UserGroup>.datas[i].Id == data.Id)
-                    {
-                        AppDbContext<UserGroup>.datas[i].Name = data.Name;
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found) throw new NotFoundException("UserGroup not found.");
-
+                dbGroup.Name = data.Name;
             }
-            catch (Exception ex)
+
+            if (!string.IsNullOrEmpty(data.Teacher))
             {
-                Console.WriteLine($"Error {ex.Message}");
+                dbGroup.Teacher = data.Teacher;
+            }
+            if (data.Room>0)
+            {
+                dbGroup.Room = data.Room;
             }
         }
+        public List<UserGroup> Getbyteacher(Predicate<UserGroup> predicate)
+        {
+            
+            List<UserGroup>userGroups=AppDbContext<UserGroup>.datas.FindAll(predicate);
+            if (userGroups.Count==0)
+            {
+                throw new NullReferenceException("cant find teacher for all groups");
+            }
+            return userGroups;
+
+        }
+        public List<UserGroup> GetByRoom(Predicate<UserGroup> predicate)
+        {
+            List<UserGroup> userGroups = AppDbContext<UserGroup>.datas.FindAll(predicate);
+            if (userGroups.Count==0)
+            {
+                throw new NullReferenceException("cant find this roomcount for all groups");
+            }
+            return userGroups;
+        }
+
     }
 }

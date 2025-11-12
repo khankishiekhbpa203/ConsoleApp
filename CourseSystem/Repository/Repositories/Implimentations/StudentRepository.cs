@@ -7,37 +7,25 @@ namespace Repository.Repositories.Implimentations
 {
     public class StudentRepository : IRepository<Student>
     {
+
         public void Create(Student data)
         {
-            try
-            {
-                if (data == null)
-                {
-                    throw new NotFoundException("Student not found!");
-                }
-                AppDbContext<Student>.datas.Add(data);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+            if (data == null)
+                throw new ArgumentNullException(nameof(data), "Student cannot be null");
+
+            if (AppDbContext<Student>.datas == null)
+                throw new NullReferenceException("Database (datas) is not initialized");
+
+            AppDbContext<Student>.datas.Add(data);
         }
+
 
         public void Delete(Student data)
         {
-            try
+            if (data!=null)
             {
-                if (data==null)
-                {
-                    throw new NotFoundException("Student doesnt exist");
-                }
                 AppDbContext<Student>.datas.Remove(data);
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
         }
 
         public Student Get(Predicate<Student> predicate)
@@ -52,8 +40,8 @@ namespace Repository.Repositories.Implimentations
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Repository error: {ex.Message}");
-                throw;
+                Console.WriteLine($"{ex.Message}");
+                return null;
             }
         }
 
@@ -123,6 +111,15 @@ namespace Repository.Repositories.Implimentations
             {
                 Console.WriteLine($"Error in Update: {ex.Message}");
             }
+        }
+        public List<Student> GetStudentByAge(Predicate<Student> predicate)
+        {
+            List<Student> students = AppDbContext<Student>.datas.FindAll(predicate);
+            if (students.Count==0)
+            {
+                throw new NullReferenceException("cant find this age for all students");
+            }
+            return students;
         }
     }
 }

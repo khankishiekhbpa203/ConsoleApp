@@ -15,5 +15,6 @@ namespace Service.Services.Interfaces
         UserGroup GetById(int id);
         List<UserGroup> GetAll();
         List<UserGroup> Search(string name);
+        List<UserGroup> GetByTeacher(string name);
     }
 }
