@@ -27,7 +27,7 @@ namespace Repository.Repositories.Implimentations
         {
             try
             {
-                if (data == null) throw new NotFoundException("Usergroup cant be null");
+                if (data == null) throw new NotFoundException("Cant find group");
 
 
                 if (AppDbContext<UserGroup>.datas.Count!=0)

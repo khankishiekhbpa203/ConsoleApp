@@ -2,7 +2,8 @@
 using Domain.Entities;
 using Service.Services.Implementations;
 using Service.Services.Interfaces;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System;
+
 
 
 namespace CoursePresentation.Controllers
@@ -13,13 +14,25 @@ namespace CoursePresentation.Controllers
 
         public void Create()
         {
-            Helper.PrintConsole(ConsoleColor.Blue, "Add Group Name:");
+GroupName: Helper.PrintConsole(ConsoleColor.Blue, "Add Group Name:");
 
             string groupname = Console.ReadLine();
 
-            Helper.PrintConsole(ConsoleColor.Blue, "Add Group Teacher Name:");
+            if (!groupname.Any(ch => char.IsLetterOrDigit(ch)))
+            {
+                Helper.PrintConsole(ConsoleColor.Red, "Group name cant be simvol or empty");
+                goto GroupName;
+            }
+
+TeacherName: Helper.PrintConsole(ConsoleColor.Blue, "Add Group Teacher Name:");
 
             string groupteacher = Console.ReadLine();
+            if (groupteacher.Any(ch => !char.IsLetter(ch)) || string.IsNullOrWhiteSpace(groupteacher))
+            {
+                Helper.PrintConsole(ConsoleColor.Red, "Teacher name cant be simvol,digit or empty");
+                goto TeacherName;
+            }
+            groupteacher=char.ToUpper(groupteacher[0]) + groupteacher.Substring(1).ToLower();
 
             Helper.PrintConsole(ConsoleColor.Blue, "Add Group Room count:");
 
@@ -30,7 +43,7 @@ selectRoomCount: string roomcount = Console.ReadLine();
             bool isRoomCount = int.TryParse(roomcount, out roomCount);
             if (isRoomCount)
             {
-                UserGroup userGroup = new UserGroup { Name=groupname, Teacher=groupteacher, Room= roomCount };
+                UserGroup userGroup = new UserGroup { Name=groupname.ToUpper(), Teacher=groupteacher, Room= roomCount };
                 var result = _usergroupService.Create(userGroup);
                 Helper.PrintConsole(ConsoleColor.Green, $"Group Id: {userGroup.Id} ,Group Name: {userGroup.Name} ,Group Teacher: {userGroup.Teacher} ,Group Room: {userGroup.Room}");
             }
@@ -42,10 +55,15 @@ selectRoomCount: string roomcount = Console.ReadLine();
         }
         public void Delete()
         {
-            Helper.PrintConsole(ConsoleColor.Blue, "Add Group Id:");
+            Helper.PrintConsole(ConsoleColor.Blue, "Add Group Id: (or enter for cancel operation)");
 GroupId: string groupId = Console.ReadLine();
             int id;
 
+            if (string.IsNullOrWhiteSpace(groupId)||groupId=="exit")
+            {
+                Helper.PrintConsole(ConsoleColor.Red, "Update operation cancelled.");
+                return;
+            }
             bool isGroupId = int.TryParse(groupId, out id);
             if (isGroupId)
             {
@@ -55,7 +73,7 @@ GroupId: string groupId = Console.ReadLine();
                 }
                 catch (Exception ex)
                 {
-                    Helper.PrintConsole(ConsoleColor.Red, ex.Message);
+                    Helper.PrintConsole(ConsoleColor.Red,"Group can't find");
                     goto GroupId;
                 }
             }
